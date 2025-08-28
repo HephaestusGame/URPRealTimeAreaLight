@@ -1,7 +1,7 @@
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering.HighDefinition.LTC;
 
-namespace UnityEngine.Rendering.HighDefinition
+namespace UnityEngine.Rendering
 {
     [GenerateHLSL]
     internal enum LTCLightingModel
@@ -61,7 +61,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
         static LTCAreaLight s_Instance;
 
-        internal static LTCAreaLight instance
+        internal static LTCAreaLight Instance
         {
             get
             {

@@ -53,7 +53,8 @@ MonoBehaviour:
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
   - {fileID: -1878332245247344467}
-  m_RendererFeatureMap: adc0de57c6d2eee5
+  - {fileID: 5617323777727235287}
+  m_RendererFeatureMap: adc0de57c6d2eee5d784c9c736bef44d
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -102,3 +103,24 @@ MonoBehaviour:
   m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &5617323777727235287
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70be9ce529f596c4aa1b01a7af7ea173, type: 3}
+  m_Name: AreaLightRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  maxAreaLightCount: 10
+  renderPassEvent: 250
+  preIntegratedFGDGGXDisneyDiffuseShader: {fileID: 4800000, guid: 123f13d52852ef547b2962de4bd9eaad,
+    type: 3}
+  preIntegratedFGDCharlieFabricLambertShader: {fileID: 4800000, guid: 3b3bf235775cf8b4baae7f3306787ab0,
+    type: 3}
+  preIntegratedFGDMarschnerShader: {fileID: 4800000, guid: 31f36caf0a5e7f848a1b5328b6ad3eb8,
+    type: 3}

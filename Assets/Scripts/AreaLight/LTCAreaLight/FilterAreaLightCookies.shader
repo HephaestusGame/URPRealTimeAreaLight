@@ -11,12 +11,13 @@ Shader "Hidden/CoreResources/FilterAreaLightCookies"
         // SRP includes
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
-        #include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
+        // #include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 
         // Input Data
         TEXTURE2D( _SourceTexture );
         TEXTURECUBE( _SourceCubeTexture );
         SAMPLER( sampler_SourceCubeTexture );
+        SAMPLER(s_linear_clamp_sampler);
         uniform uint    _SourceMipLevel;
         uniform float4  _SourceSize;
         uniform float4  _UVLimits;

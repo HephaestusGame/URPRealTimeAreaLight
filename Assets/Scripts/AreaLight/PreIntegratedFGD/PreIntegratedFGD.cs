@@ -4,15 +4,23 @@ namespace UnityEngine.Rendering
 {
     partial class PreIntegratedFGD
     {
+        private static Shader s_PreIntegratedFGDGGXDisneyDiffuseShader;
+        private static Shader s_PreIntegratedFGDCharlieFabricLambertShader;
+        private static Shader s_PreIntegratedFGDMarschnerShader;
+        
+        public static readonly int _PreIntegratedFGD_GGXDisneyDiffuse = Shader.PropertyToID("_PreIntegratedFGD_GGXDisneyDiffuse");
+        public static readonly int _PreIntegratedFGD_CharlieAndFabric = Shader.PropertyToID("_PreIntegratedFGD_CharlieAndFabric");
+        public static readonly int _PreIntegratedFGD_Marschner = Shader.PropertyToID("_PreIntegratedFGD_Marschner");
+        
         [GenerateHLSL]
         public enum FGDTexture
         {
             Resolution = 64
         }
 
-        static PreIntegratedFGD s_Instance;
+        private static PreIntegratedFGD s_Instance;
 
-        public static PreIntegratedFGD instance
+        public static PreIntegratedFGD Instance
         {
             get
             {
@@ -37,7 +45,16 @@ namespace UnityEngine.Rendering
         Material[] m_PreIntegratedFGDMaterial = new Material[(int)FGDIndex.Count];
         RenderTexture[] m_PreIntegratedFGD = new RenderTexture[(int)FGDIndex.Count];
 
-        PreIntegratedFGD()
+
+        
+        public static void SetPreIntegratedShaders(Shader preIntegratedFGDGGXDisneyDiffuseShader, Shader preIntegratedFGDCharlieFabricLambertShader, Shader preIntegratedFGDMarschnerShader)
+        {
+            s_PreIntegratedFGDGGXDisneyDiffuseShader = preIntegratedFGDGGXDisneyDiffuseShader;
+            s_PreIntegratedFGDCharlieFabricLambertShader  = preIntegratedFGDCharlieFabricLambertShader;
+            s_PreIntegratedFGDMarschnerShader = preIntegratedFGDMarschnerShader;
+        }
+        
+        private PreIntegratedFGD()
         {
             for (int i = 0; i < (int)FGDIndex.Count; ++i)
             {
@@ -45,7 +62,7 @@ namespace UnityEngine.Rendering
                 m_refCounting[i] = 0;
             }
         }
-
+        
         public void Build(FGDIndex index)
         {
             Debug.Assert(index != FGDIndex.Count);
@@ -58,7 +75,7 @@ namespace UnityEngine.Rendering
                 switch (index)
                 {
                     case FGDIndex.FGD_GGXAndDisneyDiffuse:
-                        m_PreIntegratedFGDMaterial[(int)index] = CoreUtils.CreateEngineMaterial(HDRenderPipelineGlobalSettings.instance.renderPipelineResources.shaders.preIntegratedFGD_GGXDisneyDiffusePS);
+                        m_PreIntegratedFGDMaterial[(int)index] = CoreUtils.CreateEngineMaterial(s_PreIntegratedFGDGGXDisneyDiffuseShader);
                         m_PreIntegratedFGD[(int)index] = new RenderTexture(res, res, 0, GraphicsFormat.A2B10G10R10_UNormPack32);
                         m_PreIntegratedFGD[(int)index].hideFlags = HideFlags.HideAndDontSave;
                         m_PreIntegratedFGD[(int)index].filterMode = FilterMode.Bilinear;
@@ -68,7 +85,7 @@ namespace UnityEngine.Rendering
                         break;
 
                     case FGDIndex.FGD_CharlieAndFabricLambert:
-                        m_PreIntegratedFGDMaterial[(int)index] = CoreUtils.CreateEngineMaterial(HDRenderPipelineGlobalSettings.instance.renderPipelineResources.shaders.preIntegratedFGD_CharlieFabricLambertPS);
+                        m_PreIntegratedFGDMaterial[(int)index] = CoreUtils.CreateEngineMaterial(s_PreIntegratedFGDCharlieFabricLambertShader);
                         m_PreIntegratedFGD[(int)index] = new RenderTexture(res, res, 0, GraphicsFormat.A2B10G10R10_UNormPack32);
                         m_PreIntegratedFGD[(int)index].hideFlags = HideFlags.HideAndDontSave;
                         m_PreIntegratedFGD[(int)index].filterMode = FilterMode.Bilinear;
@@ -78,7 +95,7 @@ namespace UnityEngine.Rendering
                         break;
 
                     case FGDIndex.FGD_Marschner:
-                        m_PreIntegratedFGDMaterial[(int)index] = CoreUtils.CreateEngineMaterial(HDRenderPipelineGlobalSettings.instance.renderPipelineResources.shaders.preIntegratedFGD_MarschnerPS);
+                        m_PreIntegratedFGDMaterial[(int)index] = CoreUtils.CreateEngineMaterial(s_PreIntegratedFGDMarschnerShader);
                         m_PreIntegratedFGD[(int)index] = new RenderTexture(res, res, 0, GraphicsFormat.A2B10G10R10_UNormPack32);
                         m_PreIntegratedFGD[(int)index].hideFlags = HideFlags.HideAndDontSave;
                         m_PreIntegratedFGD[(int)index].filterMode = FilterMode.Bilinear;
@@ -136,15 +153,15 @@ namespace UnityEngine.Rendering
             switch (index)
             {
                 case FGDIndex.FGD_GGXAndDisneyDiffuse:
-                    cmd.SetGlobalTexture(HDShaderIDs._PreIntegratedFGD_GGXDisneyDiffuse, m_PreIntegratedFGD[(int)index]);
+                    cmd.SetGlobalTexture(_PreIntegratedFGD_GGXDisneyDiffuse, m_PreIntegratedFGD[(int)index]);
                     break;
 
                 case FGDIndex.FGD_CharlieAndFabricLambert:
-                    cmd.SetGlobalTexture(HDShaderIDs._PreIntegratedFGD_CharlieAndFabric, m_PreIntegratedFGD[(int)index]);
+                    cmd.SetGlobalTexture(_PreIntegratedFGD_CharlieAndFabric, m_PreIntegratedFGD[(int)index]);
                     break;
 
                 case FGDIndex.FGD_Marschner:
-                    cmd.SetGlobalTexture(HDShaderIDs._PreIntegratedFGD_CharlieAndFabric, m_PreIntegratedFGD[(int)index]);
+                    cmd.SetGlobalTexture(_PreIntegratedFGD_CharlieAndFabric, m_PreIntegratedFGD[(int)index]);
                     break;
 
                 default:

@@ -7,6 +7,12 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RealtimeLights.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/AmbientOcclusion.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DBuffer.hlsl"
+#include "../PreIntegratedFGD/PreIntegratedFGD.hlsl"
+#include "AreaLighting.hlsl"
+#include "Lit_Base.hlsl"
+
+#define GPULIGHTTYPE_TUBE (5)
+#define GPULIGHTTYPE_RECTANGLE (6)
 
 #if defined(LIGHTMAP_ON)
     #define DECLARE_LIGHTMAP_OR_SH(lmName, shName, index) float2 lmName : TEXCOORD##index
@@ -147,6 +153,7 @@ struct LightingData
     half3 additionalLightsColor;
     half3 vertexLightingColor;
     half3 emissionColor;
+    half3 areaLightColor;
 };
 
 half3 CalculateLightingColor(LightingData lightingData, half3 albedo)
@@ -223,7 +230,8 @@ LightingData CreateLightingData(InputData inputData, SurfaceData surfaceData)
     lightingData.vertexLightingColor = 0;
     lightingData.mainLightColor = 0;
     lightingData.additionalLightsColor = 0;
-
+    lightingData.areaLightColor = 0;
+    
     return lightingData;
 }
 
@@ -266,6 +274,13 @@ half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData)
     // NOTE: can modify "surfaceData"...
     InitializeBRDFData(surfaceData, brdfData);
 
+    //[Area Light]
+    BSDFData bsdfData;
+    bsdfData.normalWS = inputData.normalWS;
+    bsdfData.fresnel0 = brdfData.specular;
+    bsdfData.perceptualRoughness = brdfData.perceptualRoughness;
+    PreLightData preLightData = GetPreLightData(inputData.positionWS, bsdfData);
+    
     #if defined(DEBUG_DISPLAY)
     half4 debugColor;
 
@@ -338,6 +353,9 @@ half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData)
     #if defined(_ADDITIONAL_LIGHTS_VERTEX)
     lightingData.vertexLightingColor += inputData.vertexLighting * brdfData.diffuse;
     #endif
+
+    //[Area Light]
+    //TODO:计算Area Light
 
 #if REAL_IS_HALF
     // Clamp any half.inf+ to HALF_MAX

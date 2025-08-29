@@ -1,6 +1,7 @@
-#include "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/PreIntegratedFGD/PreIntegratedFGD.cs.hlsl"
+#include "PreIntegratedFGD.cs.hlsl"
 
 TEXTURE2D(_PreIntegratedFGD_GGXDisneyDiffuse);
+SAMPLER(s_linear_clamp_sampler);
 
 // For image based lighting, a part of the BSDF is pre-integrated.
 // This is done both for specular GGX height-correlated and DisneyDiffuse

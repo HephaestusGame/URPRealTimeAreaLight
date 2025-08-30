@@ -7,6 +7,8 @@ using UnityEngine.Rendering.Universal;
 
 public class AreaLightRenderPass : ScriptableRenderPass
 {
+    public int maxAreaLightCount;
+    
     private readonly ProfilingSampler m_ProfilingSampler = new ProfilingSampler("AreaLightRenderPass");
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
@@ -16,6 +18,7 @@ public class AreaLightRenderPass : ScriptableRenderPass
             PreIntegratedFGD.Instance.RenderInit(PreIntegratedFGD.FGDIndex.FGD_GGXAndDisneyDiffuse, cmd);
             PreIntegratedFGD.Instance.Bind(cmd, PreIntegratedFGD.FGDIndex.FGD_GGXAndDisneyDiffuse);
             LTCAreaLight.Instance.Bind(cmd);
+            AreaLightManager.Instance.UpdateAreaLightData(cmd);
         }
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();
@@ -57,6 +60,7 @@ public class AreaLightRenderFeature : ScriptableRendererFeature
         }
         PreIntegratedFGD.SetPreIntegratedShaders(preIntegratedFGDGGXDisneyDiffuseShader, preIntegratedFGDCharlieFabricLambertShader, preIntegratedFGDMarschnerShader);
 #endif
+        AreaLightManager.Instance.Init(maxAreaLightCount);
         if (!m_Initialized)
         {
             m_Initialized = true;
@@ -66,7 +70,8 @@ public class AreaLightRenderFeature : ScriptableRendererFeature
 
         m_AreaLightRenderPass = new AreaLightRenderPass
         {
-            renderPassEvent = renderPassEvent
+            renderPassEvent = renderPassEvent,
+            maxAreaLightCount = maxAreaLightCount
         };
     }
     
@@ -81,6 +86,7 @@ public class AreaLightRenderFeature : ScriptableRendererFeature
         {
             PreIntegratedFGD.Instance.Cleanup(PreIntegratedFGD.FGDIndex.FGD_GGXAndDisneyDiffuse);
             LTCAreaLight.Instance.Cleanup();
+            m_Initialized = false;
         }
     }
 }

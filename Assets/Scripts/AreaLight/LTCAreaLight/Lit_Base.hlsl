@@ -11,6 +11,7 @@
 #include "AreaLighting.hlsl"
 #include "LTCAreaLight.hlsl"
 
+#define MAX_AREA_LIGHTS 10
 #define GPULIGHTTYPE_TUBE (5)
 #define GPULIGHTTYPE_RECTANGLE (6)
 
@@ -23,12 +24,13 @@ struct DirectLighting
 struct AreaLightData
 {
     int lightType;
-    real range;
+    float intensity;
+    float range;
     // float diffuseDimmer;
     // float specularDimmer;
-    real4 size;
     float rangeAttenuationScale;
     float rangeAttenuationBias;
+    float2 size;
     float3 color;
     float3 positionRWS;
     float3 up;
@@ -36,6 +38,18 @@ struct AreaLightData
     float3 forward;
 };
 
+CBUFFER_START(AreaLightBuffer)
+    int _AreaLightCount;
+    int _AreaLightTypeArray[MAX_AREA_LIGHTS];
+    //x:range y:rangeAttenuationScale z:rangeAttenuationBias, w:intensity
+    float4 _AreaLightRangeAndIntensityArray[MAX_AREA_LIGHTS];
+    float2 _AreaLightSizeArray[MAX_AREA_LIGHTS];
+    float3 _AreaLightColorArray[MAX_AREA_LIGHTS];
+    float3 _AreaLightPositionArray[MAX_AREA_LIGHTS];
+    float3 _AreaLightDirectionUpArray[MAX_AREA_LIGHTS];
+    float3 _AreaLightDirectionRightArray[MAX_AREA_LIGHTS];
+    float3 _AreaLightDirectionForwardArray[MAX_AREA_LIGHTS];
+CBUFFER_END
 
 // Precomputed lighting data to send to the various lighting functions
 struct PreLightData
@@ -242,6 +256,7 @@ half3 EvaluateBSDF_Line(PositionInputs posInput, PreLightData preLightData, Area
                                                      lightData.rangeAttenuationScale,
                                                      lightData.rangeAttenuationBias);
 
+    intensity *= lightData.intensity;
     // Terminate if the shaded point is too far away.
     if (intensity != 0.0)
     {
@@ -391,6 +406,7 @@ half3 EvaluateBSDF_Rect(PositionInputs posInput, PreLightData preLightData, Area
                                                 lightData.rangeAttenuationBias);
     #endif
 
+        intensity *= lightData.intensity;
         // Terminate if the shaded point is too far away.
         if (intensity != 0.0)
         {
@@ -553,17 +569,16 @@ half3 EvaluateBSDF_Rect(PositionInputs posInput, PreLightData preLightData, Area
     return lighting.diffuse + lighting.specular;
 }
 
-half3 EvaluateBSDF_Area(
-    float3 V, PositionInputs posInput,
+half3 EvaluateBSDF_Area(PositionInputs posInput,
     PreLightData preLightData, AreaLightData lightData)
 {
     if (lightData.lightType == GPULIGHTTYPE_TUBE)
     {
-        return EvaluateBSDF_Line(V, posInput, preLightData, lightData);
+        return EvaluateBSDF_Line(posInput, preLightData, lightData);
     }
     else
     {
-        return EvaluateBSDF_Rect(V, posInput, preLightData, lightData);
+        return EvaluateBSDF_Rect(posInput, preLightData, lightData);
     }
 }
 

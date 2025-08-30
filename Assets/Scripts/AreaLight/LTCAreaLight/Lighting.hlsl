@@ -7,7 +7,6 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RealtimeLights.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/AmbientOcclusion.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DBuffer.hlsl"
-#include "../PreIntegratedFGD/PreIntegratedFGD.hlsl"
 #include "AreaLighting.hlsl"
 #include "Lit_Base.hlsl"
 

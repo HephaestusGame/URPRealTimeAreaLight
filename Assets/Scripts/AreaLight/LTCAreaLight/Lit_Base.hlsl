@@ -79,6 +79,36 @@ struct BSDFData
     real perceptualRoughness;
 };
 
+// Expects non-normalized vertex positions.
+// Same as regular PolygonIrradiance found in AreaLighting.hlsl except I need the form factor F
+// (cf. http://blog.selfshadow.com/publications/s2016-advances/s2016_ltc_rnd.pdf pp. 92 for an explanation on the meaning of that sphere approximation)
+real PolygonIrradiance(real4x3 L, out float3 F)
+{
+    UNITY_UNROLL
+        for (uint i = 0; i < 4; i++)
+        {
+            L[i] = normalize(L[i]);
+        }
+
+    F = 0.0;
+
+    UNITY_UNROLL
+        for (uint edge = 0; edge < 4; edge++)
+        {
+            real3 V1 = L[edge];
+            real3 V2 = L[(edge + 1) % 4];
+
+            F += INV_TWO_PI * ComputeEdgeFactor(V1, V2);
+        }
+
+    // Clamp invalid values to avoid visual artifacts.
+    real f2 = saturate(dot(F, F));
+    real sinSqSigma = min(sqrt(f2), 0.999);
+    real cosOmega = clamp(F.z * rsqrt(f2), -1, 1);
+
+    return DiffuseSphereLightIrradiance(sinSqSigma, cosOmega);
+}
+
 PreLightData GetPreLightData(float3 positionWS, BSDFData bsdfData)
 {
     half3 V = GetWorldSpaceNormalizeViewDir(positionWS);
@@ -226,12 +256,12 @@ PreLightData GetPreLightData(float3 positionWS, BSDFData bsdfData)
 // EvaluateBSDF_Line - Approximation with Linearly Transformed Cosines
 //-----------------------------------------------------------------------------
 
-half3 EvaluateBSDF_Line(PositionInputs posInput, PreLightData preLightData, AreaLightData lightData)
+half3 EvaluateBSDF_Line(InputData inputData, PreLightData preLightData, AreaLightData lightData)
 {
     DirectLighting lighting;
     ZERO_INITIALIZE(DirectLighting, lighting);
 
-    float3 positionWS = posInput.positionWS;
+    float3 positionWS = inputData.positionWS;
 
 // #ifdef LIT_DISPLAY_REFERENCE_AREA
     //这个是直接数值积分的方式，不是LTC，测试对比用
@@ -356,12 +386,12 @@ half3 EvaluateBSDF_Line(PositionInputs posInput, PreLightData preLightData, Area
 
 // #define ELLIPSOIDAL_ATTENUATION
 
-half3 EvaluateBSDF_Rect(PositionInputs posInput, PreLightData preLightData, AreaLightData lightData)
+half3 EvaluateBSDF_Rect(InputData inputData, PreLightData preLightData, AreaLightData lightData)
 {
     DirectLighting lighting;
     ZERO_INITIALIZE(DirectLighting, lighting);
 
-    float3 positionWS = posInput.positionWS;
+    float3 positionWS = inputData.positionWS;
 
 #if SHADEROPTIONS_BARN_DOOR
     // Apply the barn door modification to the light data
@@ -426,7 +456,6 @@ half3 EvaluateBSDF_Rect(PositionInputs posInput, PreLightData preLightData, Area
 
             // Rotate the endpoints into the local coordinate system.
             lightVerts = mul(lightVerts, transpose(preLightData.orthoBasisViewNormal));
-
             float3 ltcValue;
 
             // Evaluate the diffuse part
@@ -441,6 +470,7 @@ half3 EvaluateBSDF_Rect(PositionInputs posInput, PreLightData preLightData, Area
 #endif
             // ltcValue *= lightData.diffuseDimmer;
             ltcValue *= intensity;
+            // return formFactorD.z;
 
             //TODO: Cookie
 //             // Only apply cookie if there is one
@@ -569,17 +599,16 @@ half3 EvaluateBSDF_Rect(PositionInputs posInput, PreLightData preLightData, Area
     return lighting.diffuse + lighting.specular;
 }
 
-half3 EvaluateBSDF_Area(PositionInputs posInput,
-    PreLightData preLightData, AreaLightData lightData)
+half3 EvaluateBSDF_Area(InputData inputData, PreLightData preLightData, AreaLightData lightData)
 {
-    if (lightData.lightType == GPULIGHTTYPE_TUBE)
-    {
-        return EvaluateBSDF_Line(posInput, preLightData, lightData);
-    }
-    else
-    {
-        return EvaluateBSDF_Rect(posInput, preLightData, lightData);
-    }
+    // if (lightData.lightType == GPULIGHTTYPE_TUBE)
+    // {
+    //     return EvaluateBSDF_Line(inputData, preLightData, lightData);
+    // }
+    // else
+    // {
+        return EvaluateBSDF_Rect(inputData, preLightData, lightData);
+    // }
 }
 
 #endif

@@ -25,6 +25,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //                      Lighting Functions                                   //
+
 ///////////////////////////////////////////////////////////////////////////////
 half3 LightingLambert(half3 lightColor, half3 lightDir, half3 normal)
 {
@@ -183,6 +184,8 @@ half3 CalculateLightingColor(LightingData lightingData, half3 albedo)
     {
         lightingColor += lightingData.vertexLightingColor;
     }
+
+    lightingColor += lightingData.areaLightColor;
 
     lightingColor *= albedo;
 
@@ -354,8 +357,40 @@ half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData)
     #endif
 
     //[Area Light]
-    //TODO:计算Area Light
-
+    AreaLightData areaLightData;
+    // struct AreaLightData
+    // {
+    //     int lightType;
+    //     float intensity;
+    //     float range;
+    //     // float diffuseDimmer;
+    //     // float specularDimmer;
+    //     float rangeAttenuationScale;
+    //     float rangeAttenuationBias;
+    //     float2 size;
+    //     float3 color;
+    //     float3 positionRWS;
+    //     float3 up;
+    //     float3 right;
+    //     float3 forward;
+    // };
+    for (int i = 0; i < _AreaLightCount; i++)
+    {
+        areaLightData.lightType = _AreaLightTypeArray[i];
+        float4 rangeAndIntensity = _AreaLightRangeAndIntensityArray[i];
+        areaLightData.range = rangeAndIntensity.x;
+        areaLightData.rangeAttenuationScale = rangeAndIntensity.y;
+        areaLightData.rangeAttenuationBias = rangeAndIntensity.z;
+        areaLightData.intensity = rangeAndIntensity.w;
+        areaLightData.size = _AreaLightSizeArray[i];
+        areaLightData.color = _AreaLightColorArray[i];
+        areaLightData.positionRWS =  _AreaLightPositionArray[i];
+        areaLightData.up = _AreaLightDirectionUpArray[i];
+        areaLightData.right = _AreaLightDirectionRightArray[i];
+        areaLightData.forward = _AreaLightDirectionForwardArray[i];
+        
+        lightingData.areaLightColor += EvaluateBSDF_Area(inputData, preLightData, areaLightData);
+    }
 #if REAL_IS_HALF
     // Clamp any half.inf+ to HALF_MAX
     return min(CalculateFinalColor(lightingData, surfaceData.alpha), HALF_MAX);

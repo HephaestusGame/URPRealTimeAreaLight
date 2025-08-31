@@ -44,7 +44,9 @@ public class AreaLightManager
         }
     }
 
-    private int m_MaxAreaLightCount;
+    //需要与Shader中一致
+    private const int k_MaxAreaLightCount = 10;
+    private int m_ActualMaxAreaLightCount;
     private float[] m_AreaLightTypeArray;
     private Vector4[] m_AreaLightRangeAndIntensityArray;
     private Vector4[] m_AreaLightSizeArray;
@@ -56,15 +58,15 @@ public class AreaLightManager
     
     public void Init(int maxAreaLightCount)
     {
-        m_MaxAreaLightCount = maxAreaLightCount;
-        m_AreaLightTypeArray = new float[maxAreaLightCount];
-        m_AreaLightRangeAndIntensityArray = new Vector4[maxAreaLightCount];
-        m_AreaLightSizeArray = new Vector4[maxAreaLightCount];
-        m_AreaLightColorArray = new Vector4[maxAreaLightCount];
-        m_AreaLightPositionArray = new Vector4[maxAreaLightCount];
-        m_AreaLightDirectionUpArray = new Vector4[maxAreaLightCount];
-        m_AreaLightDirectionRightArray = new Vector4[maxAreaLightCount];
-        m_AreaLightDirectionForwardArray = new Vector4[maxAreaLightCount];
+        m_ActualMaxAreaLightCount = maxAreaLightCount;
+        m_AreaLightTypeArray = new float[k_MaxAreaLightCount];
+        m_AreaLightRangeAndIntensityArray = new Vector4[k_MaxAreaLightCount];
+        m_AreaLightSizeArray = new Vector4[k_MaxAreaLightCount];
+        m_AreaLightColorArray = new Vector4[k_MaxAreaLightCount];
+        m_AreaLightPositionArray = new Vector4[k_MaxAreaLightCount];
+        m_AreaLightDirectionUpArray = new Vector4[k_MaxAreaLightCount];
+        m_AreaLightDirectionRightArray = new Vector4[k_MaxAreaLightCount];
+        m_AreaLightDirectionForwardArray = new Vector4[k_MaxAreaLightCount];
     }
 
     public void Add(AreaLight areaLight)
@@ -99,7 +101,7 @@ public class AreaLightManager
             m_AreaLightDirectionForwardArray[areaLightCount] = forward;
             
             areaLightCount++;
-            if (areaLightCount > m_MaxAreaLightCount)
+            if (areaLightCount > m_ActualMaxAreaLightCount)
             {
                 break;
             }

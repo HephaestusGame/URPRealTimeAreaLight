@@ -116,7 +116,7 @@ MonoBehaviour:
   m_Name: AreaLightRenderFeature
   m_EditorClassIdentifier: 
   m_Active: 1
-  maxAreaLightCount: 6
+  maxAreaLightCount: 9
   renderPassEvent: 250
   preIntegratedFGDGGXDisneyDiffuseShader: {fileID: 4800000, guid: 123f13d52852ef547b2962de4bd9eaad,
     type: 3}

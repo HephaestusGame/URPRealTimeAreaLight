@@ -8,17 +8,27 @@ using UnityEngine.Rendering.Universal;
 public class AreaLightRenderPass : ScriptableRenderPass
 {
     public int maxAreaLightCount;
-    
     private readonly ProfilingSampler m_ProfilingSampler = new ProfilingSampler("AreaLightRenderPass");
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
+        if (renderingData.cameraData.camera.cameraType != CameraType.Game
+            && renderingData.cameraData.camera.cameraType != CameraType.SceneView)
+        {
+            return;
+        }
+        
         CommandBuffer cmd = CommandBufferPool.Get(m_ProfilingSampler.name);;
         using (new ProfilingScope(cmd, m_ProfilingSampler))
         {
+            //Light
             PreIntegratedFGD.Instance.RenderInit(PreIntegratedFGD.FGDIndex.FGD_GGXAndDisneyDiffuse, cmd);
             PreIntegratedFGD.Instance.Bind(cmd, PreIntegratedFGD.FGDIndex.FGD_GGXAndDisneyDiffuse);
             LTCAreaLight.Instance.Bind(cmd);
             AreaLightManager.Instance.UpdateAreaLightData(cmd);
+            
+            //Shadow
+            AreaLightManager.Instance.UpdateShadowData(context, ref renderingData, cmd);
+            
         }
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();

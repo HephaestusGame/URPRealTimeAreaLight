@@ -170,6 +170,48 @@ Shader "Universal Render Pipeline/CustomLit"
             #include "LitForwardPass.hlsl"
             ENDHLSL
         }
+        
+        Pass
+        {
+            Name "AreaLightShadowMap"
+            Tags
+            {
+                "LightMode" = "AreaLightShadowMap"
+            }
+            
+            ZWrite On
+            ZTest LEqual
+            ColorMask 0
+            HLSLPROGRAM
+
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #pragma vertex vert
+            #pragma fragment frag
+            
+            struct Attibutes
+            {
+                float3 posOS : POSITION;
+            };
+
+            struct Varyings
+            {
+                float4 posCS : SV_POSITION;
+            };
+
+            Varyings vert(Attibutes input)
+            {
+                Varyings output;
+                output.posCS = GetVertexPositionInputs(input.posOS).positionCS;
+                return output;
+            }
+
+            half4 frag(Varyings input) : SV_Target
+            {
+                return 0;
+            }
+            
+            ENDHLSL
+        }
 
         Pass
         {

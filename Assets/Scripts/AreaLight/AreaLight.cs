@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshRenderer)),RequireComponent(typeof(MeshRenderer)), ExecuteAlways]
-public class AreaLight : MonoBehaviour
+public partial class AreaLight : MonoBehaviour
 {
     public AreaLightType areaLightType = AreaLightType.RECT;
     [Min(0.0f)]
@@ -17,6 +17,23 @@ public class AreaLight : MonoBehaviour
     public float rangeAttenuationBias = 1;
     public Color color = Color.white;
 
+    [Header("Shadows")]
+    public bool renderShadow = false;
+    public float shadowFOVAngle;
+    public float shadowMapFarPlaneDistance = 100;
+    public LayerMask shadowCullingMask = ~0;
+    public TextureSize shadowMapSize = TextureSize.x2048;
+    [Min(0)]
+    public float receiverSearchDistance = 24.0f;
+    [Min(0)]
+    public float receiverDistanceScale = 5.0f;
+    [Min(0)]
+    public float lightNearSize = 4.0f;
+    [Min(0)]
+    public float lightFarSize = 22.0f;
+    [Range(0, 0.1f)]
+    public float shadowBias = 0.001f;
+    
     private Transform m_Transform;
 
     private void OnEnable()
@@ -39,23 +56,34 @@ public class AreaLight : MonoBehaviour
             m_Transform = transform;
         }
         pos = m_Transform.position;
-        size = Vector2.zero;
 
-        //用这个是包围盒的尺寸，如果mesh旋转了，尺寸会不对
-        // if (m_MeshRenderer == null)
-        // {
-        //     m_MeshRenderer = GetComponent<MeshRenderer>();
-        // }
-        //size = m_MeshRenderer.bounds.size;
 
-        if (m_Mesh == null)
+        size = LightSize;
+    }
+
+    public Vector2 LightSize
+    {
+        get
         {
-            m_Mesh = GetComponent<MeshFilter>().sharedMesh;
-        }
+            Vector2 size = Vector2.zero;
+
+            //用这个是包围盒的尺寸，如果mesh旋转了，尺寸会不对
+            // if (m_MeshRenderer == null)
+            // {
+            //     m_MeshRenderer = GetComponent<MeshRenderer>();
+            // }
+            //size = m_MeshRenderer.bounds.size;
+
+            if (m_Mesh == null)
+            {
+                m_Mesh = GetComponent<MeshFilter>().sharedMesh;
+            }
         
-        Vector3 localSize = m_Mesh.bounds.size;
-        Vector3 scale = transform.lossyScale; // 世界缩放
-        size = Vector3.Scale(localSize, scale); // 按分量相乘
+            Vector3 localSize = m_Mesh.bounds.size;
+            Vector3 scale = transform.lossyScale; 
+            size = Vector3.Scale(localSize, scale);
+            return size;
+        }
     }
 
     public void GetDirection(out Vector3 up, out Vector3 right, out Vector3 forward)

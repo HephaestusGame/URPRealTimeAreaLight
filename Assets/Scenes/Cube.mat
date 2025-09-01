@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Floor
+  m_Name: Cube
   m_Shader: {fileID: 4800000, guid: a6608f231e1557340ac1e9683e43201a, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0

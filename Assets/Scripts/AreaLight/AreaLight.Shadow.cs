@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 
 public partial class AreaLight : MonoBehaviour
 {
-    public Camera m_ShadowmapCamera;
+    private Camera m_ShadowmapCamera;
     private Transform m_ShadowmapCameraTransform;
     public enum TextureSize
     {

@@ -6,32 +6,34 @@ using UnityEngine;
 [RequireComponent(typeof(MeshRenderer)),RequireComponent(typeof(MeshRenderer)), ExecuteAlways]
 public partial class AreaLight : MonoBehaviour
 {
-    public AreaLightType areaLightType = AreaLightType.RECT;
+    [HideInInspector]public AreaLightType areaLightType = AreaLightType.RECT;
     [Min(0.0f)]
     public float intensity = 1.0f;
     [Min(0.0f)]
     public float range = 10;
     [Min(0.0f)]
     public float rangeAttenuationScale = 1;
-    [Min(0.0f)]
+    [Range(0.0f, 1.0f)]
     public float rangeAttenuationBias = 1;
     public Color color = Color.white;
+    [Min(0.0f)]
+    public float lightSourceEmission = 3.0f;
 
-    [Header("Shadows")]
-    public bool renderShadow = false;
-    public float shadowFOVAngle;
-    public float shadowMapFarPlaneDistance = 100;
-    public LayerMask shadowCullingMask = ~0;
-    public TextureSize shadowMapSize = TextureSize.x2048;
-    [Min(0)]
+    // [Header("Shadows")]
+    [HideInInspector]public bool renderShadow = false;
+    [HideInInspector]public float shadowFOVAngle;
+    [HideInInspector]public float shadowMapFarPlaneDistance = 100;
+    [HideInInspector]public LayerMask shadowCullingMask = ~0;
+    [HideInInspector]public TextureSize shadowMapSize = TextureSize.x2048;
+    [HideInInspector][Min(0)]
     public float receiverSearchDistance = 24.0f;
-    [Min(0)]
+    [HideInInspector][Min(0)]
     public float receiverDistanceScale = 5.0f;
-    [Min(0)]
+    [HideInInspector][Min(0)]
     public float lightNearSize = 4.0f;
-    [Min(0)]
+    [HideInInspector][Min(0)]
     public float lightFarSize = 22.0f;
-    [Range(0, 0.1f)]
+    [HideInInspector][Range(0, 0.1f)]
     public float shadowBias = 0.001f;
     
     private Transform m_Transform;
@@ -112,6 +114,6 @@ public partial class AreaLight : MonoBehaviour
             m_Material = m_MeshRenderer.sharedMaterial;
         }
         
-        m_Material.SetColor(_LightColor, color * intensity);
+        m_Material.SetColor(_LightColor, color * lightSourceEmission);
     }
 }

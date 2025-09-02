@@ -29,7 +29,7 @@ public class AreaLightRenderPass : ScriptableRenderPass
             AreaLightManager.Instance.UpdateAreaLightData(cmd);
             
             //Shadow
-            UpdateShadowData(context, ref renderingData, cmd);
+            // UpdateShadowData(context, ref renderingData, cmd);
         }
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();

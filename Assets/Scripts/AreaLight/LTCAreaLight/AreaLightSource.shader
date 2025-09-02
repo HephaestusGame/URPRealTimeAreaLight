@@ -1,4 +1,4 @@
-Shader "Unlit/AreaLight"
+Shader "Unlit/AreaLightSource"
 {
     Properties
     {

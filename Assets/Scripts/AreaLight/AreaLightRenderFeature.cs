@@ -2,13 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 public class AreaLightRenderPass : ScriptableRenderPass
 {
-    public int maxAreaLightCount;
+    public int actualMaxAreaLightCount;
     private readonly ProfilingSampler m_ProfilingSampler = new ProfilingSampler("AreaLightRenderPass");
+    
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
         if (renderingData.cameraData.camera.cameraType != CameraType.Game
@@ -27,12 +29,87 @@ public class AreaLightRenderPass : ScriptableRenderPass
             AreaLightManager.Instance.UpdateAreaLightData(cmd);
             
             //Shadow
-            AreaLightManager.Instance.UpdateShadowData(context, ref renderingData, cmd);
-            
+            UpdateShadowData(context, ref renderingData, cmd);
         }
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();
         CommandBufferPool.Release(cmd);
+    }
+
+    private void UpdateShadowData(ScriptableRenderContext context, ref RenderingData renderingData, CommandBuffer cmd)
+    {
+        //记录原来的vp矩阵
+        Matrix4x4 viewMatrix = renderingData.cameraData.camera.worldToCameraMatrix;
+        Matrix4x4 projectionMatrix = renderingData.cameraData.camera.projectionMatrix;
+        
+        // Matrix4x4 viewMatrix = renderingData.cameraData.GetViewMatrix();
+        // Matrix4x4 projectionMatrix = renderingData.cameraData.GetGPUProjectionMatrix();
+        
+        int areaLightIndex = 0;
+        ShaderTagId shaderTagId = new ShaderTagId("DepthOnly");
+        foreach (var areaLight in AreaLightManager.Instance.areaLightSet)
+        {
+            if (areaLight.renderShadow)
+            {
+                RTHandle shadowMap = GetShadowMap(ref renderingData, cmd, areaLightIndex, (int)areaLight.shadowMapSize);
+                ConfigureClear(ClearFlag.All, Color.black);
+                ConfigureTarget(shadowMap);
+                areaLight.GetViewProjectionMatrices(out Matrix4x4 view, out Matrix4x4 projection);
+                cmd.SetViewProjectionMatrices(view, projection);
+                context.ExecuteCommandBuffer(cmd);
+                cmd.Clear(); 
+                
+                
+                var sortingSettings = new SortingSettings()
+                {
+                    criteria = SortingCriteria.CommonOpaque
+                };
+                var drawingSettings = new DrawingSettings(shaderTagId, sortingSettings);
+                var filteringSettings = new FilteringSettings(RenderQueueRange.all);
+                ScriptableCullingParameters cullingParameters = areaLight.GetShadowMapCullingParameters();
+                CullingResults cullingResults = context.Cull(ref cullingParameters);
+                context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
+            }
+            
+            areaLightIndex++;
+            if (areaLightIndex > actualMaxAreaLightCount)
+            {
+                break;
+            }
+        }
+        
+        cmd.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
+        context.ExecuteCommandBuffer(cmd);
+        cmd.Clear(); 
+    }
+    
+    private int[] m_AreaLightRenderShadowFlagsArray = new int[AreaLightManager.k_MaxAreaLightCount];
+    private RTHandle[] m_AreaLightShadowMapArray = new RTHandle[AreaLightManager.k_MaxAreaLightCount];
+    
+    const GraphicsFormat k_DepthStencilFormat = GraphicsFormat.D32_SFloat_S8_UInt;
+    const int k_DepthBufferBits = 32;
+    private RTHandle GetShadowMap(ref RenderingData renderingData, CommandBuffer cmd, int areaLightIndex, int shadowMapSize)
+    {
+        RTHandle rtHandle = m_AreaLightShadowMapArray[areaLightIndex];
+
+        var desc = renderingData.cameraData.cameraTargetDescriptor; 
+        desc.width = shadowMapSize;
+        desc.height = shadowMapSize;
+        desc.depthStencilFormat = k_DepthStencilFormat;
+        desc.depthBufferBits = k_DepthBufferBits;
+        desc.graphicsFormat = GraphicsFormat.None;
+        
+        //var desc =  new RenderTextureDescriptor(shadowMapSize, shadowMapSize, RenderTextureFormat.Shadowmap, 24);
+        // desc.depthStencilFormat = GraphicsFormat.D24_UNorm;
+        RenderingUtils.ReAllocateIfNeeded(
+            ref rtHandle,
+            desc,
+            name: "AreaLightShadowMap",
+            filterMode: FilterMode.Point,
+            wrapMode: TextureWrapMode.Clamp
+        );
+        m_AreaLightShadowMapArray[areaLightIndex] = rtHandle;
+        return rtHandle;
     }
 }
 
@@ -81,7 +158,7 @@ public class AreaLightRenderFeature : ScriptableRendererFeature
         m_AreaLightRenderPass = new AreaLightRenderPass
         {
             renderPassEvent = renderPassEvent,
-            maxAreaLightCount = maxAreaLightCount
+            actualMaxAreaLightCount = maxAreaLightCount
         };
     }
     

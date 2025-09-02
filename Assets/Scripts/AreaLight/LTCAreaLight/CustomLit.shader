@@ -181,7 +181,6 @@ Shader "Universal Render Pipeline/CustomLit"
             
             ZWrite On
             ZTest LEqual
-            ColorMask 0
             HLSLPROGRAM
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"

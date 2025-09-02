@@ -30,7 +30,7 @@ public class AreaLightManager
 
     #endregion
     
-    private HashSet<AreaLight> m_AreaLightsSet = new HashSet<AreaLight>();
+    public HashSet<AreaLight> areaLightSet = new HashSet<AreaLight>();
     
     private static AreaLightManager m_Instance;
     public static AreaLightManager Instance
@@ -47,7 +47,7 @@ public class AreaLightManager
     }
 
     //需要与Shader中一致
-    private const int k_MaxAreaLightCount = 10;
+    public const int k_MaxAreaLightCount = 10;
     private int m_ActualMaxAreaLightCount;
     private float[] m_AreaLightTypeArray;
     private Vector4[] m_AreaLightRangeAndIntensityArray;
@@ -73,18 +73,18 @@ public class AreaLightManager
 
     public void Add(AreaLight areaLight)
     {
-        m_AreaLightsSet.Add(areaLight);
+        areaLightSet.Add(areaLight);
     }
 
     public void Remove(AreaLight areaLight)
     {
-        m_AreaLightsSet.Remove(areaLight);
+        areaLightSet.Remove(areaLight);
     }
     
     public void UpdateAreaLightData(CommandBuffer cmd)
     {
         int areaLightCount = 0;
-        foreach (var areaLight in m_AreaLightsSet)
+        foreach (var areaLight in areaLightSet)
         {
             m_AreaLightTypeArray[areaLightCount] = (int)areaLight.areaLightType;
             m_AreaLightRangeAndIntensityArray[areaLightCount] = new Vector4(
@@ -118,86 +118,5 @@ public class AreaLightManager
         cmd.SetGlobalVectorArray(_AreaLightDirectionUpArray, m_AreaLightDirectionUpArray);
         cmd.SetGlobalVectorArray(_AreaLightDirectionRightArray, m_AreaLightDirectionRightArray);
         cmd.SetGlobalVectorArray(_AreaLightDirectionForwardArray, m_AreaLightDirectionForwardArray);
-    }
-
-
-    private int[] m_AreaLightRenderShadowFlagsArray = new int[k_MaxAreaLightCount];
-    private RTHandle[] m_AreaLightShadowMapArray = new RTHandle[k_MaxAreaLightCount];
-    
-    public void UpdateShadowData(ScriptableRenderContext context, ref RenderingData renderingData, CommandBuffer cmd)
-    {
-        //记录原来的vp矩阵
-        Matrix4x4 viewMatrix = renderingData.cameraData.camera.worldToCameraMatrix;
-        Matrix4x4 projectionMatrix = renderingData.cameraData.camera.projectionMatrix;
-        
-        // Matrix4x4 viewMatrix = renderingData.cameraData.GetViewMatrix();
-        // Matrix4x4 projectionMatrix = renderingData.cameraData.GetGPUProjectionMatrix();
-        
-        int areaLightIndex = 0;
-        ShaderTagId shaderTagId = new ShaderTagId("DepthOnly");
-        foreach (var areaLight in m_AreaLightsSet)
-        {
-            if (areaLight.renderShadow)
-            {
-                RTHandle shadowMap = GetShadowMap(ref renderingData, cmd, areaLightIndex, (int)areaLight.shadowMapSize);
-                ScriptableCullingParameters cullingParameters = areaLight.GetShadowMapCullingParameters();
-
-
-                
-                CullingResults cullingResults = context.Cull(ref cullingParameters);
-                
-                cmd.SetRenderTarget(shadowMap);
-                cmd.ClearRenderTarget(true, true, Color.white);
-                areaLight.GetViewProjectionMatrices(out Matrix4x4 view, out Matrix4x4 projection);
-                cmd.SetViewProjectionMatrices(view, projection);
-                context.ExecuteCommandBuffer(cmd);
-                cmd.Clear(); 
-                
-                var sortingSettings = new SortingSettings()
-                {
-                    // criteria = SortingCriteria.CommonOpaque
-                };
-                var drawingSettings = new DrawingSettings(shaderTagId, sortingSettings);
-                var filteringSettings = new FilteringSettings(RenderQueueRange.all);
-                context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
-            }
-            
-            areaLightIndex++;
-            if (areaLightIndex > m_ActualMaxAreaLightCount)
-            {
-                break;
-            }
-        }
-        
-        cmd.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
-        context.ExecuteCommandBuffer(cmd);
-        cmd.Clear(); 
-    }
-
-    private RTHandle GetShadowMap(ref RenderingData renderingData, CommandBuffer cmd, int areaLightIndex, int shadowMapSize)
-    {
-        RTHandle rtHandle = m_AreaLightShadowMapArray[areaLightIndex];
-        
-        // int texID = Shader.PropertyToID("AreaLightShadowMap");
-        // var cameraTargetDescriptor = renderingData.cameraData.cameraTargetDescriptor;
-        // cameraTargetDescriptor.width = shadowMapSize;
-        // cameraTargetDescriptor.height = shadowMapSize;
-        // cameraTargetDescriptor.depthBufferBits = 24;
-        // cmd.GetTemporaryRT(texID, cameraTargetDescriptor);
-        // if (rtHandle == null)
-        // {
-        //     rtHandle = RTHandles.Alloc(new RenderTargetIdentifier(texID));
-        // }
-        
-        var desc = new RenderTextureDescriptor(shadowMapSize, shadowMapSize, RenderTextureFormat.Depth, 24);
-        RenderingUtils.ReAllocateIfNeeded(
-            ref rtHandle, 
-            desc, 
-            name:"AreaLightShadowMap", 
-            filterMode: FilterMode.Bilinear, 
-            wrapMode: TextureWrapMode.Clamp
-            );
-        m_AreaLightShadowMapArray[areaLightIndex] = rtHandle;
-        return rtHandle;
     }
 }

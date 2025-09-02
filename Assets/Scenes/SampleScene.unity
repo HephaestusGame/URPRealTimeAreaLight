@@ -222,13 +222,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 317208704}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.3577976, y: 0.9337992, z: 0, w: 0}
-  m_LocalPosition: {x: -2.99, y: 0.498, z: -0.72}
+  m_LocalRotation: {x: 0.8351447, y: 0.5500303, z: -0, w: 0}
+  m_LocalPosition: {x: -3.05, y: 0.59, z: 0.44}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 41.93}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 113.262}
 --- !u!114 &317208709
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -243,10 +243,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   areaLightType: 6
   intensity: 5.4
-  range: 15.54
+  range: 135.5
   rangeAttenuationScale: 1
   rangeAttenuationBias: 1
-  color: {r: 0.5686275, g: 0.06237771, b: 0, a: 1}
+  color: {r: 1, g: 0, b: 0, a: 1}
   renderShadow: 0
   shadowFOVAngle: 0
   shadowMapFarPlaneDistance: 100
@@ -346,8 +346,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.34036532, y: 0.022235136, z: -0.008180167, w: -0.93999475}
-  m_LocalPosition: {x: -0.25869417, y: 3.5777047, z: -4.2917323}
+  m_LocalRotation: {x: 0.2235939, y: 0.18610199, z: -0.043537173, w: 0.9557595}
+  m_LocalPosition: {x: -2.4869199, y: 2.0852098, z: -5.7998857}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -414,7 +414,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!108 &410087040
 Light:
   m_ObjectHideFlags: 0
@@ -422,7 +422,7 @@ Light:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
@@ -633,7 +633,7 @@ GameObject:
   - component: {fileID: 669870668}
   - component: {fileID: 669870667}
   - component: {fileID: 669870671}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: AreaLight (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -746,11 +746,11 @@ MonoBehaviour:
   rangeAttenuationBias: 1
   color: {r: 0.04164031, g: 0.87169814, b: 0, a: 1}
   renderShadow: 1
-  shadowFOVAngle: 63.1
+  shadowFOVAngle: 46.6
   shadowMapFarPlaneDistance: 12.07
   shadowCullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 55
   shadowMapSize: 2048
   receiverSearchDistance: 24
   receiverDistanceScale: 5
@@ -928,7 +928,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   areaLightType: 6
   intensity: 3
-  range: 9.86
+  range: 5.01
   rangeAttenuationScale: 1
   rangeAttenuationBias: 1
   color: {r: 1, g: 1, b: 1, a: 1}
@@ -1150,7 +1150,7 @@ Transform:
   m_GameObject: {fileID: 2045598776}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.17, y: 0.205, z: -1.29}
+  m_LocalPosition: {x: 0.17, y: 0.27, z: -1.29}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
